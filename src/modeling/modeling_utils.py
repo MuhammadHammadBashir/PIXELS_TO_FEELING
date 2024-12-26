@@ -134,24 +134,47 @@ class EarlyStopping:
             self.best_score = score
             self.counter = 0
 
+# def weighted_sample(df, col):
+#     """Calculates class weights for use in Pytorch's WeightedRandomSampler.
+
+#     Weights for each class are computed using their inverse frequency. That is,
+#     a class that appears 100 times will have a weight of 1/100, whereas a class
+#     that appears 10 times will have a weight of 1/10.
+
+#     Args:
+#         df (dataframe): Pandas dataframe containing images and labels.
+#         col (str): String corresponding to label column.
+
+#     Returns:
+#         List containing weights for each class.
+#     """
+#     class_sample_counts = df[col].value_counts().reset_index().sort_values('index')[col].tolist()
+#     weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
+#     samples_weights = weights[df[col].tolist()]
+#     return samples_weights
+
 def weighted_sample(df, col):
-    """Calculates class weights for use in Pytorch's WeightedRandomSampler.
+    """Calculates class weights for use in PyTorch's WeightedRandomSampler.
 
     Weights for each class are computed using their inverse frequency. That is,
     a class that appears 100 times will have a weight of 1/100, whereas a class
     that appears 10 times will have a weight of 1/10.
 
     Args:
-        df (dataframe): Pandas dataframe containing images and labels.
-        col (str): String corresponding to label column.
+        df (pd.DataFrame): Pandas dataframe containing images and labels.
+        col (str): String corresponding to the label column.
 
     Returns:
-        List containing weights for each class.
+        torch.Tensor: List containing weights for each sample in the dataframe.
     """
-    class_sample_counts = df[col].value_counts().reset_index().sort_values('index')[col].tolist()
-    weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
-    samples_weights = weights[df[col].tolist()]
-    return samples_weights
+    # Count the occurrences of each class
+    class_sample_counts = df[col].value_counts().sort_index()
+    # Compute weights inversely proportional to class frequencies
+    weights = 1. / torch.tensor(class_sample_counts.values, dtype=torch.float)
+    # Map weights to the samples
+    samples_weights = [weights[label] for label in df[col]]
+    return torch.tensor(samples_weights)
+
 
 def save_model(path,
                epoch,
