@@ -311,13 +311,20 @@ def train_model(model,
                 print(train_acc_history[-1])
                 print(val_acc_history[-1])
                 print("logs.csv")
-                log_df = log_df.append(pd.DataFrame({
+                # log_df = log_df.append(pd.DataFrame({
+                #     'epoch': [epoch],
+                #     'train_loss': [train_loss_history[-1]],
+                #     'val_loss': [val_loss_history[-1]],
+                #     'train_acc': [train_acc_history[-1].cpu().numpy()],
+                #     'val_acc': [val_acc_history[-1].cpu().numpy()]
+                # }))
+                log_df = pd.concat([log_df, pd.DataFrame({
                     'epoch': [epoch],
                     'train_loss': [train_loss_history[-1]],
                     'val_loss': [val_loss_history[-1]],
                     'train_acc': [train_acc_history[-1].cpu().numpy()],
                     'val_acc': [val_acc_history[-1].cpu().numpy()]
-                }))
+                })], ignore_index=True)
                 log_df.to_csv(log_filename)
 
         print()
